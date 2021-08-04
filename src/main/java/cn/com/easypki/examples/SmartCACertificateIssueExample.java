@@ -58,8 +58,6 @@ public class SmartCACertificateIssueExample {
      */
     @Before
     public void init() throws Exception {
-
-
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
         keyPairGenerator.initialize(2048);
         userKeyPair = keyPairGenerator.generateKeyPair();
@@ -161,23 +159,24 @@ public class SmartCACertificateIssueExample {
             System.out.println("业务响应消息:" + personalIssueResponse.getData().getMessage());
         }
 
+        //开始构建PFX证书
         String signatureCertificate = personalIssueResponse.getData().getSignatureCert();
         String pin = "123456";
+        String alias = "smart";
+        byte[] pfxBinary = this.buildPfx(signatureCertificate, userKeyPair.getPrivate(), alias, pin);
 
-        byte[] pfxBinary = this.buildPfx(signatureCertificate, userKeyPair.getPrivate(), pin);
-        OutputStream outputStream = new FileOutputStream("/Users/wangjx/Desktop/TEST/s2.pfx");
+        //测试输出
+        OutputStream outputStream = new FileOutputStream("/Users/xxx/Desktop/TEST/s2.pfx");
         IOUtils.write(pfxBinary, outputStream);
         System.out.println("done");
     }
 
-    private byte[] buildPfx(String signatureCertificate, PrivateKey privateKey, String pin) {
+    private byte[] buildPfx(String signatureCertificate, PrivateKey privateKey, String alias, String pin) {
 
         try {
             Certificate entityCertificate = CertificateConverter.fromBase64(signatureCertificate);
-
-//            Certificate[] chain =
-
-        } catch (CertificateException e) {
+            return PfxGenerateExample.generate(entityCertificate, privateKey, alias, pin);
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
